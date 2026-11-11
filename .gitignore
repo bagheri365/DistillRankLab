@@ -19,3 +19,6 @@ htmlcov/
 
 # OS files
 .DS_Store
+
+# Local teacher score caches
+teacher_scores_*.json
