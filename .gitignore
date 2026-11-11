@@ -22,3 +22,6 @@ htmlcov/
 
 # Local teacher score caches
 teacher_scores_*.json
+
+# Downloaded benchmark archives and generated candidate pools
+datasets/
