@@ -12,7 +12,8 @@ def main():
     parser.add_argument('--output', type=Path, default=Path('datasets/scifact_test_bm25'))
     parser.add_argument('--split', choices=('train', 'test'), default='test')
     parser.add_argument('--top-k', type=int, default=100)
-    parser.add_argument('--max-queries', type=int, default=20)
+    parser.add_argument('--max-queries', type=int, default=None,
+                        help='Optional number of queries; omitted means the full official split')
     parser.add_argument('--download', action='store_true')
     args = parser.parse_args()
     if args.download:
