@@ -1,0 +1,6 @@
+p1	Distillation trains a student from a teacher.
+p2	Cross encoders jointly encode query and passage.
+p3	KL divergence compares probability distributions.
+p4	Linear rankers score features with weights.
+p5	MRR measures the first relevant result rank.
+p6	A completely unrelated passage.
