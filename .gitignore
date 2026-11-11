@@ -1,0 +1,21 @@
+# Python environments
+.venv/
+venv/
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Test and tooling caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local patch downloads
+*.patch
+
+# OS files
+.DS_Store
