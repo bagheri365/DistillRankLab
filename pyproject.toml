@@ -7,15 +7,13 @@ name = "distillranklab"
 version = "0.1.0"
 description = "Experiments in knowledge distillation for neural search ranking"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["numpy>=1.24,<3"]
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
 
-[tool.setuptools]
-packages = []
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
-# Initial packaging scaffold. When a src/distillrank package is added,
