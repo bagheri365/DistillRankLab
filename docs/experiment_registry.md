@@ -59,3 +59,16 @@ Never use test-set scores to choose feature sets or optimization settings.
 - Paired MLP-16 minus linear: nDCG delta **+0.0017681005**, 95% bootstrap CI **[-0.0061303836, 0.0107289729]**, sign-flip p **0.7016**; MRR delta **+0.0018934940**, CI **[-0.0052226631, 0.0093449931]**, p **0.6341**
 - Both nDCG intervals contain zero; no significant improvement established. MLP-8 slightly exceeds MLP-16 on mean nDCG; neither beats BM25. All comparisons exploratory and uncorrected for multiple comparisons.
 - No model selection and no official test evaluation. Record null or negative findings.
+
+## 8A frozen semantic encoder feasibility (planned; measurements TBD)
+
+- Status: **TBD — run on Intel Mac CPU**, no observed metrics claimed.
+- Frozen encoder: `sentence-transformers/all-MiniLM-L6-v2`; 10-feature linear
+  ranking head (8 rich lexical + 2 pretrained embedding interaction features).
+- Teacher: cached `cross-encoder/ms-marco-MiniLM-L-6-v2` training scores only.
+- Scope: first 12 fit and 4 validation queries after seed-42 query-disjoint
+  split of official SciFact train; first 20 BM25 candidates per query.
+- Record: number of retrieved positives, student/BM25 same-subset nDCG@10 and
+  MRR@10, encoder/cache wall time, head fit time, model and library versions.
+- **Not comparable** to 7B–7E 162-query, top-100 validation metrics.
+  Previously reused validation is exploratory; no official test access.

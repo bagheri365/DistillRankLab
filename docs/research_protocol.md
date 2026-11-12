@@ -109,3 +109,19 @@ and exploratory because the validation split was repeatedly inspected.
 The legacy `mean_teacher_minus_bm25` statistic key remains available for
 compatibility; 7E also exposes `mean_candidate_minus_reference` to clarify
 that the comparison is MLP minus linear, not teacher minus BM25.
+
+## 8A: frozen pretrained text features (feasibility only)
+
+The initial neural-representation study uses a frozen pretrained sentence
+encoder to embed queries and passages on CPU. Its two embedding interactions
+are concatenated with the established eight rich lexical features, and a
+10-weight linear listwise head is trained with cached teacher scores. This
+isolates pretrained semantic representation from head capacity; it is **not**
+a trained text encoder or a cross-encoder student. Teacher inference and
+official test access are disallowed by the experiment script.
+
+The deliberately small, BM25-truncated train-only subset makes runtime
+manageable but changes retrieval coverage and evaluation difficulty. Only
+compare the student against BM25 **on exactly the same subset**. Do not
+interpret a subset difference as a benchmark improvement, nor compare its
+absolute scores to 7E. See `examples/19_scifact_text_feasibility_README.md`.
