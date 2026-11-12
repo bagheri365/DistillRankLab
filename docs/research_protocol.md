@@ -72,3 +72,15 @@ are deterministic within each query-document pair; BM25 rank is retained.
 Validation reuse and previous model comparisons make 7C **exploratory**, not
 confirmatory. Any performance change may reflect features, dimensionality,
 or optimization interactions; it does not establish a causal explanation.
+
+## Milestone 7D: controlled nonlinear capacity ablation
+
+Use the **same official-train-only** query-disjoint validation split (seed 42)
+and the same eight rich features for a linear model and two small tanh MLPs
+(8 and 16 hidden units). Keep the listwise hybrid objective, temperature,
+learning rate, steps, seed, and fixed BM25 candidate pool identical. Compare
+all-query nDCG@10 and MRR@10, trainable parameter counts, and measured runtime.
+Select on validation nDCG only and refit on official training queries. Do not
+use official test scores for capacity selection. This split was used in 7B/7C,
+so 7D validation results are exploratory, not an independent confirmation.
+See `examples/16_scifact_nonlinear_ablation_README.md`.
