@@ -19,23 +19,48 @@ from .ranking_metrics import evaluate_ranking
 
 TOKEN = re.compile(r'(?u)\b\w+\b')
 FEATURE_NAMES = ('token_overlap', 'query_token_recall', 'log_passage_length', 'bm25_rank_prior')
+EXTRA_FEATURE_NAMES = ('saturated_term_frequency', 'query_bigram_recall',
+                       'character_trigram_jaccard', 'length_ratio')
+FEATURE_SETS = {
+    'baseline': FEATURE_NAMES,
+    'lexical': FEATURE_NAMES + EXTRA_FEATURE_NAMES[:2],
+    'rich': FEATURE_NAMES + EXTRA_FEATURE_NAMES,
+}
 
 
-def feature_groups(groups: Sequence[QueryGroup]) -> list[np.ndarray]:
+def _trigrams(value: str) -> set[str]:
+    compact = ' '.join(TOKEN.findall(value.lower()))
+    return {compact[i:i + 3] for i in range(max(0, len(compact) - 2))}
+
+
+
+def feature_groups(groups: Sequence[QueryGroup], *, feature_set: str = 'baseline') -> list[np.ndarray]:
     """Deterministic, label-free features; BM25 rank is an input feature."""
+    if feature_set not in FEATURE_SETS:
+        raise ValueError('unknown feature set')
     matrices = []
     for group in groups:
         if not group.candidates:
             raise ValueError('query groups must have candidates')
         q = set(TOKEN.findall(group.query.lower()))
+        qwords = TOKEN.findall(group.query.lower())
+        qbigrams = set(zip(qwords, qwords[1:]))
+        qtrigrams = _trigrams(group.query) if feature_set == 'rich' else set()
         rows = []
         for rank, candidate in enumerate(group.candidates):
             words = TOKEN.findall(candidate.passage.lower())
             counts = Counter(words)
             overlap = sum(min(counts[t], 3) for t in q)
-            rows.append((math.log1p(overlap), len(q & set(counts)) / max(len(q), 1),
-                         math.log1p(len(words)) / 10.0,
-                         1.0 / (1.0 + rank)))
+            values = [math.log1p(overlap), len(q & set(counts)) / max(len(q), 1),
+                      math.log1p(len(words)) / 10.0, 1.0 / (1.0 + rank)]
+            if feature_set != 'baseline':
+                values.extend((sum(counts[t] / (counts[t] + 1.0) for t in q) / max(len(q), 1),
+                               len(qbigrams & set(zip(words, words[1:]))) / max(len(qbigrams), 1)))
+            if feature_set == 'rich':
+                dtrigrams = _trigrams(candidate.passage)
+                values.extend((len(qtrigrams & dtrigrams) / max(len(qtrigrams | dtrigrams), 1),
+                               min(len(words), len(qwords)) / max(len(words), len(qwords), 1)))
+            rows.append(tuple(values))
         matrices.append(np.asarray(rows, dtype=np.float64))
     return matrices
 
@@ -49,7 +74,8 @@ def _probabilities(logits: np.ndarray, temperature: float) -> np.ndarray:
 
 def fit_student(groups: Sequence[QueryGroup], teacher_scores: Mapping[tuple[str, str], float] | None,
                 *, mode: str = 'soft', temperature: float = 2.0, hard_weight: float = 0.5,
-                steps: int = 300, learning_rate: float = 0.05, seed: int = 42) -> dict:
+                steps: int = 300, learning_rate: float = 0.05, seed: int = 42,
+                feature_set: str = 'baseline') -> dict:
     """Fit soft, hard or hybrid listwise objectives with full-batch gradients.
 
     Soft: teacher probability distribution on all candidates.
@@ -69,7 +95,7 @@ def fit_student(groups: Sequence[QueryGroup], teacher_scores: Mapping[tuple[str,
         raise ValueError('seed must be an integer')
     if not groups or len({g.query_id for g in groups}) != len(groups):
         raise ValueError('need nonempty groups with unique query IDs')
-    xs = feature_groups(groups)
+    xs = feature_groups(groups, feature_set=feature_set)
     soft_active = mode in ('soft', 'hybrid') and (mode != 'hybrid' or hard_weight < 1)
     hard_active = mode in ('hard', 'hybrid') and (mode != 'hybrid' or hard_weight > 0)
     if soft_active and teacher_scores is None:
@@ -92,7 +118,7 @@ def fit_student(groups: Sequence[QueryGroup], teacher_scores: Mapping[tuple[str,
         hard_targets.append(gains / gains.sum() if gains.sum() else None)
     if hard_active and not any(t is not None for t in hard_targets):
         raise ValueError('hard-label training requires at least one retrieved judged positive')
-    w = np.random.default_rng(seed).normal(0, 0.01, size=len(FEATURE_NAMES))
+    w = np.random.default_rng(seed).normal(0, 0.01, size=len(FEATURE_SETS[feature_set]))
     soft_fraction = 1.0 if mode == 'soft' else 0.0 if mode == 'hard' else 1 - hard_weight
     hard_fraction = 1 - soft_fraction
     soft_count = len(groups) if soft_active else 0
@@ -108,7 +134,7 @@ def fit_student(groups: Sequence[QueryGroup], teacher_scores: Mapping[tuple[str,
         w -= learning_rate * gradient
         if not np.isfinite(w).all():
             raise ValueError('training diverged; lower learning_rate')
-    return {'version': 1, 'mode': mode, 'weights': w.tolist(), 'features': list(FEATURE_NAMES),
+    return {'version': 1, 'mode': mode, 'weights': w.tolist(), 'features': list(FEATURE_SETS[feature_set]), 'feature_set': feature_set,
             'temperature': temperature, 'hard_weight': hard_weight, 'steps': steps,
             'learning_rate': learning_rate, 'seed': seed, 'training_queries': len(groups),
             'hard_eligible_queries': hard_count,
@@ -116,13 +142,15 @@ def fit_student(groups: Sequence[QueryGroup], teacher_scores: Mapping[tuple[str,
 
 
 def predict_student(groups: Sequence[QueryGroup], model: dict) -> dict[tuple[str, str], float]:
-    if model.get('version') != 1 or model.get('features') != list(FEATURE_NAMES):
+    feature_set = model.get('feature_set', 'baseline')
+    if (model.get('version') != 1 or feature_set not in FEATURE_SETS
+            or model.get('features') != list(FEATURE_SETS[feature_set])):
         raise ValueError('incompatible student model')
     w = np.asarray(model['weights'], dtype=np.float64)
-    if w.shape != (len(FEATURE_NAMES),) or not np.isfinite(w).all():
+    if w.shape != (len(FEATURE_SETS[feature_set]),) or not np.isfinite(w).all():
         raise ValueError('invalid student weights')
     return {(g.query_id, c.passage_id): float(score)
-            for g, x in zip(groups, feature_groups(groups))
+            for g, x in zip(groups, feature_groups(groups, feature_set=feature_set))
             for c, score in zip(g.candidates, x @ w)}
 
 

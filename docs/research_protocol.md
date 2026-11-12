@@ -54,3 +54,21 @@ four-feature linear model is an interpretable baseline, not a neural encoder;
 any performance gap may reflect features, model capacity, optimization, or
 supervision assumptions. Never describe the 7B test run as a fresh untouched
 confirmatory evaluation, given the exploratory 7A test results.
+
+## 7C feature ablation and registry
+
+Milestone 7B selected a four-feature soft student (temperature 2) with
+validation all-query nDCG@10 **0.682475**, versus BM25 **0.688365** on the
+same 162 validation queries. Its refit test score was **0.644325** nDCG@10
+(exploratory; the test split was previously examined).
+
+Milestone 7C compares baseline (4), lexical (6), and rich (8) feature sets,
+each with hard, soft and hybrid objectives, on the **identical train-only
+validation split**. Optimization settings are fixed across feature sets;
+no official test data enters selection or reporting. See
+`examples/15_scifact_feature_ablation_README.md` for definitions and commands
+and `docs/experiment_registry.md` for observed outcomes. The extra features
+are deterministic within each query-document pair; BM25 rank is retained.
+Validation reuse and previous model comparisons make 7C **exploratory**, not
+confirmatory. Any performance change may reflect features, dimensionality,
+or optimization interactions; it does not establish a causal explanation.

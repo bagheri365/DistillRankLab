@@ -60,7 +60,7 @@ def select_student(groups: Sequence[QueryGroup],
     best_value = float('-inf')
     for index, config in enumerate(configs):
         # Only documented fit_student parameters are accepted; fail on typos.
-        if set(config) != {'mode', 'learning_rate', 'steps', 'temperature', 'hard_weight'}:
+        if not {'mode', 'learning_rate', 'steps', 'temperature', 'hard_weight'} <= set(config) or set(config) - {'mode', 'learning_rate', 'steps', 'temperature', 'hard_weight', 'feature_set'}:
             raise ValueError('invalid config keys')
         model = fit_student(train, teacher_scores, seed=training_seed, **config)
         metrics = evaluate_student(validation, model, k=k)
