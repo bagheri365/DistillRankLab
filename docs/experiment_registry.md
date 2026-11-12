@@ -60,9 +60,9 @@ Never use test-set scores to choose feature sets or optimization settings.
 - Both nDCG intervals contain zero; no significant improvement established. MLP-8 slightly exceeds MLP-16 on mean nDCG; neither beats BM25. All comparisons exploratory and uncorrected for multiple comparisons.
 - No model selection and no official test evaluation. Record null or negative findings.
 
-## 8A frozen semantic encoder feasibility (planned; measurements TBD)
+## 8A frozen semantic encoder feasibility (original preregistered plan)
 
-- Status: **TBD — run on Intel Mac CPU**, no observed metrics claimed.
+- Status at planning: **TBD**; actual results are recorded below in the measured 8A run log.
 - Frozen encoder: `sentence-transformers/all-MiniLM-L6-v2`; 10-feature linear
   ranking head (8 rich lexical + 2 pretrained embedding interaction features).
 - Teacher: cached `cross-encoder/ms-marco-MiniLM-L-6-v2` training scores only.
@@ -72,3 +72,27 @@ Never use test-set scores to choose feature sets or optimization settings.
   MRR@10, encoder/cache wall time, head fit time, model and library versions.
 - **Not comparable** to 7B–7E 162-query, top-100 validation metrics.
   Previously reused validation is exploratory; no official test access.
+
+## 8A frozen semantic encoder feasibility (measured)
+
+- Commit: `76f78a3`; Intel Mac CPU, Python 3.10.15.
+- Official SciFact train-only subset: 12 fit queries / 240 pairs; 4 validation
+  queries / 80 pairs (BM25 top-20); all four validation queries had a retrieved
+  positive, with just four judged and 76 unjudged validation candidates.
+- Frozen `sentence-transformers/all-MiniLM-L6-v2`; 10-parameter hybrid head.
+- Text head and BM25 both achieved MRR@10 **1.0**, nDCG@10 **1.0** on the
+  same four queries. **No demonstrated ranking improvement.**
+- First embedding stage **26.0961 s**, cached rerun **0.1422 s**;
+  head fit **0.0526 s** (first run). These timings are not general latency estimates.
+- Feasibility only: tiny, easy, reused validation subset; not comparable to
+  the 162-query top-100 results; no official test data used.
+
+## 8B scaled frozen semantic student (planned; measurements TBD)
+
+- Full official SciFact train, 647 fit / 162 validation, BM25 top-100.
+- Compare rich 8-feature linear, rich MLP-8, and frozen MiniLM embedding
+  10-feature linear head, all hybrid (T=2, hard weight 0.5, 120 steps, seed 42).
+- Teacher scores must be fully cached. SQLite embedding checkpoints are
+  resumable; log unique text count, cache hits, CPU runtime, and ranking metrics.
+- **TBD:** measured model metrics and runtimes; do not invent results.
+- Previously reused validation remains exploratory. No official test access.

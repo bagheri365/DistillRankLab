@@ -125,3 +125,15 @@ manageable but changes retrieval coverage and evaluation difficulty. Only
 compare the student against BM25 **on exactly the same subset**. Do not
 interpret a subset difference as a benchmark improvement, nor compare its
 absolute scores to 7E. See `examples/19_scifact_text_feasibility_README.md`.
+
+## 8B: scaled frozen semantic representations
+
+Keep the official SciFact test split excluded. Use the same seed-42 query-disjoint
+647/162 official-train split and the original BM25 top-100 candidate pool for
+all three models. The baselines are rich linear and MLP-8 students; the text
+student uses a frozen MiniLM encoder with two additional embedding interaction
+features and a trained linear head. Keep hybrid objective, seed, and optimization
+settings fixed. Do not claim a statistically significant improvement from the
+reused validation split. The encoder is **not** fine-tuned. Use checkpointed,
+model-ID-bound SQLite embedding storage; report cold-cache versus warm-cache
+costs separately. No new cross-encoder inference is allowed.
