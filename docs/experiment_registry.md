@@ -14,7 +14,10 @@ already been inspected repeatedly; all test findings are **exploratory**.
 | 7B | validation (162) | Selected baseline soft (T=2) | 0.682475 | 0.649081 | 7-trial selection; before refit |
 | 7B | test (300) | Refit selected baseline soft | 0.644325 | 0.617758 | Exploratory final evaluation |
 | 7C | validation (162) | Rich 8-feature hybrid | 0.682897 | 0.649647 | Selected among 9 trials; BM25 0.688365 |
-| 7D | validation (162) | Linear vs 8/16-hidden MLP | TBD | TBD | Run `examples/16_scifact_nonlinear_ablation.py` |
+| 7D | validation (162) | Linear, rich hybrid | 0.682897 | 0.649647 | 8 parameters; 45.22 s |
+| 7D | validation (162) | MLP-8, rich hybrid | 0.684157 | 0.650958 | 81 parameters; 50.37 s |
+| 7D | validation (162) | MLP-16, rich hybrid | 0.684518 | 0.651352 | 161 parameters; 53.14 s; selected |
+| 7E | validation (162) | Multi-seed linear vs MLP-8/16 | TBD | TBD | 5 seeds, paired query statistics; no test |
 
 ## 7C run log (measured)
 
@@ -31,13 +34,21 @@ already been inspected repeatedly; all test findings are **exploratory**.
 **Rules:** Do not replace TBD with guessed results. Record negative findings.
 Never use test-set scores to choose feature sets or optimization settings.
 
-## 7D run log (fill in after execution)
+## 7D run log (measured)
 
-- Commit SHA, date, hardware, Python/NumPy: **TBD**
+- Commit: `ffd8277`; hardware: Intel Mac CPU, Python 3.10.15; NumPy version/date not recorded
 - Dataset: official SciFact train, BM25 top-100; 647 fit / 162 validation
 - Fixed controls: rich features, hybrid objective, T=2, hard weight=0.5, LR=0.05, steps=120, seed=42
-- Linear (8 parameters): validation nDCG/MRR and runtime **TBD**
-- MLP (8 hidden, 81 parameters): validation nDCG/MRR and runtime **TBD**
-- MLP (16 hidden, 161 parameters): validation nDCG/MRR and runtime **TBD**
-- Selected model and conclusion: **TBD**
-- No official test data used; reused validation is exploratory.
+- Linear (8 parameters): nDCG **0.6828966118**, MRR **0.6496472663**, 45.22 s
+- MLP-8 (81 parameters): nDCG **0.6841569805**, MRR **0.6509577699**, 50.37 s
+- MLP-16 (161 parameters): nDCG **0.6845179961**, MRR **0.6513521458**, 53.14 s
+- BM25 validation nDCG **0.6883649753**; MLP-16 selected, +0.001621 vs linear
+- No official test data used; reused validation is exploratory. Times include fit and validation, not teacher scoring.
+
+## 7E run log (fill after execution)
+
+- Commit, environment, runtime: **TBD**
+- Fixed split: 647 fit / 162 validation; training seeds 11, 23, 42, 67, 101
+- Model means and sample SD across seeds: **TBD**
+- Paired MLP-minus-linear query confidence intervals and sign-flip p-values: **TBD**
+- No model selection and no official test evaluation. Record null or negative findings.

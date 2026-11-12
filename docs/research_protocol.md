@@ -84,3 +84,14 @@ Select on validation nDCG only and refit on official training queries. Do not
 use official test scores for capacity selection. This split was used in 7B/7C,
 so 7D validation results are exploratory, not an independent confirmation.
 See `examples/16_scifact_nonlinear_ablation_README.md`.
+
+## 7E multi-seed robustness protocol
+
+Repeat the predeclared 7D rich-feature hybrid linear, MLP-8 and MLP-16
+configurations across five distinct training seeds on the same train-only
+647/162 query split. Report mean/sample SD of validation all-query MRR@10
+and nDCG@10 across seeds, and per-query paired uncertainty conditional on the
+evaluated seeds. No official test split, model selection or test-based tuning.
+This reused validation is exploratory; seed variation and query uncertainty
+are distinct, and multiple comparisons are uncorrected. See
+`examples/17_scifact_multiseed_README.md`.
