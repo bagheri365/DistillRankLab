@@ -17,7 +17,9 @@ already been inspected repeatedly; all test findings are **exploratory**.
 | 7D | validation (162) | Linear, rich hybrid | 0.682897 | 0.649647 | 8 parameters; 45.22 s |
 | 7D | validation (162) | MLP-8, rich hybrid | 0.684157 | 0.650958 | 81 parameters; 50.37 s |
 | 7D | validation (162) | MLP-16, rich hybrid | 0.684518 | 0.651352 | 161 parameters; 53.14 s; selected |
-| 7E | validation (162) | Multi-seed linear vs MLP-8/16 | TBD | TBD | 5 seeds, paired query statistics; no test |
+| 7E | validation (162) | Linear, 5-seed mean | 0.682640 | 0.649339 | nDCG sample SD 0.000234; 45.38 s mean |
+| 7E | validation (162) | MLP-8, 5-seed mean | 0.684437 | 0.651298 | nDCG sample SD 0.000175; 50.27 s mean |
+| 7E | validation (162) | MLP-16, 5-seed mean | 0.684408 | 0.651232 | nDCG sample SD 0.000185; 53.60 s mean |
 
 ## 7C run log (measured)
 
@@ -45,10 +47,15 @@ Never use test-set scores to choose feature sets or optimization settings.
 - BM25 validation nDCG **0.6883649753**; MLP-16 selected, +0.001621 vs linear
 - No official test data used; reused validation is exploratory. Times include fit and validation, not teacher scoring.
 
-## 7E run log (fill after execution)
+## 7E run log (measured)
 
-- Commit, environment, runtime: **TBD**
+- Commit: `2fc8445`; Intel Mac CPU, Python 3.10.15; total runtime not recorded
 - Fixed split: 647 fit / 162 validation; training seeds 11, 23, 42, 67, 101
-- Model means and sample SD across seeds: **TBD**
-- Paired MLP-minus-linear query confidence intervals and sign-flip p-values: **TBD**
+- Mean nDCG@10 (sample SD): linear **0.6826398583** (0.0002343828); MLP-8 **0.6844370842** (0.0001748424); MLP-16 **0.6844079588** (0.0001854219)
+- Mean MRR@10: linear **0.6493386243**; MLP-8 **0.6512977660**; MLP-16 **0.6512321184**
+- Mean fit + validation wall time: linear **45.38 s**; MLP-8 **50.27 s**; MLP-16 **53.60 s**
+- BM25 validation nDCG@10 **0.6883649753**; both MLP means below BM25
+- Paired MLP-8 minus linear: nDCG delta **+0.0017972259**, 95% bootstrap CI **[-0.0061102113, 0.0107699772]**, sign-flip p **0.6980**; MRR delta **+0.0019591417**, CI **[-0.0052028219, 0.0094591417]**, p **0.6180**
+- Paired MLP-16 minus linear: nDCG delta **+0.0017681005**, 95% bootstrap CI **[-0.0061303836, 0.0107289729]**, sign-flip p **0.7016**; MRR delta **+0.0018934940**, CI **[-0.0052226631, 0.0093449931]**, p **0.6341**
+- Both nDCG intervals contain zero; no significant improvement established. MLP-8 slightly exceeds MLP-16 on mean nDCG; neither beats BM25. All comparisons exploratory and uncorrected for multiple comparisons.
 - No model selection and no official test evaluation. Record null or negative findings.

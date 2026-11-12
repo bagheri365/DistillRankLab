@@ -49,7 +49,11 @@ def query_paired_summary(query_rows: Sequence[dict], *, replicates: int = 10000,
     return {'sampling_unit': 'query', 'comparison': 'MLP minus linear',
             'mean_across_training_seeds_first': True,
             'interpretation': 'Conditional on the evaluated seeds; exploratory repeated validation; not seed uncertainty',
-            'metrics': result['metrics'], 'replicates': replicates, 'seed': seed,
+            'metrics': {name: {**values, 'mean_candidate_minus_reference': values['mean_teacher_minus_bm25']}
+                        for name, values in result['metrics'].items()},
+            'metric_difference_label': 'candidate_minus_reference',
+            'reference_architecture': 'linear', 'candidate_architecture': 'mlp',
+            'replicates': replicates, 'seed': seed,
             'query_count': len(rows)}
 
 

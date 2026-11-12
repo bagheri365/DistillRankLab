@@ -95,3 +95,17 @@ evaluated seeds. No official test split, model selection or test-based tuning.
 This reused validation is exploratory; seed variation and query uncertainty
 are distinct, and multiple comparisons are uncorrected. See
 `examples/17_scifact_multiseed_README.md`.
+
+## 7F reproducible consolidation
+
+Use `python examples/18_scifact_research_summary.py --input datasets/scifact_multiseed.json`
+to generate a machine-readable and Markdown summary from the full 7E report.
+The summary validates the **five predeclared seeds**, 120 training steps,
+647/162 query counts, and the absence of test use, rejecting the smoke test.
+It does not train, resample, load SciFact test data, or re-run the teacher.
+It includes the reported paired intervals and p-values, which are
+conditional on evaluated training seeds, uncorrected for multiple tests,
+and exploratory because the validation split was repeatedly inspected.
+The legacy `mean_teacher_minus_bm25` statistic key remains available for
+compatibility; 7E also exposes `mean_candidate_minus_reference` to clarify
+that the comparison is MLP minus linear, not teacher minus BM25.
