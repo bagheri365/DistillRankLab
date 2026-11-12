@@ -154,3 +154,16 @@ and explicitly label all five comparisons exploratory and unadjusted for
 multiplicity. Query resampling is not training-seed uncertainty. The validation
 split has already been inspected repeatedly and is not an untouched holdout.
 Record all results (including null findings) in the experiment registry.
+
+## 8D audit protocol
+
+Before any further model selection or encoder fine-tuning, replay the fixed
+8C configuration on the **train-only** 647/162 split. Refuse incomplete
+teacher/embedding caches, verify exact candidate-score keys, and record a
+candidate-order and qrel-status SHA256 fingerprint. Check all-query aggregate
+MRR/nDCG against the mean of 162 query-level values for each ranker and each
+unjudged policy. Report distributional spread (not only means) of paired
+query differences, and compare `nonrelevant` with `judged_only` as **distinct
+sensitivity scenarios**. Judged-only removes unjudged passages from rankings;
+it is not a fix for missing judgments. Do not use official test data or
+present exploratory validation comparisons as confirmatory findings.

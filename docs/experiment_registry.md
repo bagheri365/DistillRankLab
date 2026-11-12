@@ -125,3 +125,33 @@ Never use test-set scores to choose feature sets or optimization settings.
 - **TBD:** actual metrics, deltas, confidence intervals, p-values, and CPU timings.
 - No official test data used; validation repeatedly reused; no claims of
   confirmatory significance or generalization from this one split.
+
+## 8C semantic feature ablation (measured)
+
+- Commit `7cf2fb6`; 302 tests passed; official SciFact train split only,
+  647 fit / 162 validation queries, BM25 top-100, frozen MiniLM encoder.
+- All-query validation nDCG@10 / MRR@10: lexical-only **0.6828966118 /
+  0.6496472663**; semantic-only **0.7029141406 / 0.6707206545**;
+  combined **0.6987394572 / 0.6622232020**; BM25 **0.6883649753 /
+  0.6522584754**; MLP-8 **0.6841569805 / 0.6509577699**.
+- Combined minus BM25 nDCG delta **+0.01037448**, 95% query-bootstrap CI
+  **[0.00155209, 0.01944628]**, unadjusted paired sign-flip p **0.01870**.
+- Combined minus semantic-only nDCG delta **-0.00417468**, CI
+  **[-0.05208216, 0.04440079]**, p **0.86971**. Semantic-only minus
+  lexical-only nDCG delta **+0.02001753**, CI **[-0.03122253, 0.07172332]**,
+  p **0.45865**. Large uncertainty; do not claim reliable superiority.
+- All 5,979 cached embeddings reused; 0 new. **170 judged / 16,030
+  unjudged** validation candidates. Multiple unadjusted comparisons and
+  repeatedly reused validation: **exploratory only**; no official test used.
+
+## 8D evaluation audit (planned; measurements TBD)
+
+- Replay the fixed 8C model configuration without any teacher or encoder
+  inference; fail on incomplete caches.
+- Require exact score/candidate alignment, record order-sensitive pool
+  fingerprint, and reconcile per-query means with aggregate metrics.
+- Compare `nonrelevant` and `judged_only` sensitivity scenarios, plus query
+  delta distributions and spread to investigate wide 8C intervals.
+- **TBD:** actual audit outputs and interpretation from Intel Mac run.
+- Neither judgment policy recovers missing relevance labels. Reused
+  validation remains exploratory; official test data prohibited.
