@@ -96,3 +96,32 @@ Never use test-set scores to choose feature sets or optimization settings.
   resumable; log unique text count, cache hits, CPU runtime, and ranking metrics.
 - **TBD:** measured model metrics and runtimes; do not invent results.
 - Previously reused validation remains exploratory. No official test access.
+
+## 8B scaled frozen semantic student (measured)
+
+- Commit: `40db20b`; Intel Mac CPU, Python 3.10.15; SciFact official train only,
+  647 fit / 162 validation queries, BM25 top-100, 64,700 fit / 16,200 validation pairs.
+- Frozen `sentence-transformers/all-MiniLM-L6-v2`, 384-dimensional embeddings;
+  5,979 unique texts, first cache fill **280.0418 s**, fully cached read **0.3914 s**.
+- All-query nDCG@10 / MRR@10: linear **0.6828966118 / 0.6496472663**;
+  MLP-8 **0.6841569805 / 0.6509577699**;
+  BM25 **0.6883649753 / 0.6522584754**;
+  semantic 10-feature head **0.6987394572 / 0.6622232020**.
+- Semantic head training **2.8610 s**, feature construction **44.9807 s**
+  (first run); head has 10 trainable parameters, encoder frozen.
+- Validation: 150/162 queries have a retrieved positive; 170 judged and
+  16,030 unjudged candidate pairs. Semantic vs BM25 delta nDCG@10 **+0.0103744819**.
+- Exploratory, repeatedly reused validation; no paired significance result
+  yet, no official test used. Fixed-pool reranking, not full-corpus retrieval.
+
+## 8C semantic feature ablation (planned; measurements TBD)
+
+- Same official SciFact train-only 647/162 query split, BM25 top-100, cached
+  teacher and frozen embeddings, seed 42, 120 steps, hybrid objective.
+- Compare lexical-only (8 active features), semantic-only (2), combined (10),
+  plus BM25 and MLP-8 references; identical query candidate pools.
+- Paired query bootstrap CIs and sign-flip tests (10,000 replicates, seed 42),
+  including combined vs BM25 and MLP-8. Multiple exploratory comparisons.
+- **TBD:** actual metrics, deltas, confidence intervals, p-values, and CPU timings.
+- No official test data used; validation repeatedly reused; no claims of
+  confirmatory significance or generalization from this one split.

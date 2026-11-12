@@ -137,3 +137,20 @@ settings fixed. Do not claim a statistically significant improvement from the
 reused validation split. The encoder is **not** fine-tuned. Use checkpointed,
 model-ID-bound SQLite embedding storage; report cold-cache versus warm-cache
 costs separately. No new cross-encoder inference is allowed.
+
+## 8C frozen semantic-feature block ablation
+
+Hold official SciFact test data out of this stage. Use the fixed query-disjoint
+647/162 split of the official train pool (BM25 top-100, seed 42). Reuse the
+frozen MiniLM embeddings and cached cross-encoder scores. Compare a shared
+10-coordinate linear ranking head with lexical-only (8 active coordinates),
+semantic-only (2), and combined (10). Mask inactive columns to zero before
+fitting and scoring; preserve optimizer, initialization seed, objective and
+steps. Report MRR@10 and nDCG@10 on all 162 validation queries, including
+zero-credit queries with no retrieved positive. Compare the combined head to
+BM25 and MLP-8 using query-paired bootstrap confidence intervals and sign-flip
+p-values; compare feature blocks likewise. Report 10,000 resamples, seed 42,
+and explicitly label all five comparisons exploratory and unadjusted for
+multiplicity. Query resampling is not training-seed uncertainty. The validation
+split has already been inspected repeatedly and is not an untouched holdout.
+Record all results (including null findings) in the experiment registry.
