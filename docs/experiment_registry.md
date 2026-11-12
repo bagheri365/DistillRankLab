@@ -155,3 +155,30 @@ Never use test-set scores to choose feature sets or optimization settings.
 - **TBD:** actual audit outputs and interpretation from Intel Mac run.
 - Neither judgment policy recovers missing relevance labels. Reused
   validation remains exploratory; official test data prohibited.
+
+## 8D fixed-pool audit (measured)
+
+- Commit `f6c9e98`; 316 tests passed. Official train-only 647/162 validation;
+  all 5,979 cached embeddings reused, zero new inference.
+- Validation pool SHA256 `efca1a9fa6463a831749c747b9a3d1543f18161c474aadec63750949aa6cc440`.
+  Per-query and aggregate MRR/nDCG reconciled for all audited comparisons.
+- Nonrelevant-policy nDCG: combined vs BM25 **+0.01037448** (21 improved,
+  6 regressed; query-delta SD **0.05794**); semantic-only vs BM25
+  **+0.01454917** (38 improved, 33 regressed; SD **0.31701**);
+  combined vs semantic-only **-0.00417468** (34 improved, 36 regressed;
+  SD **0.31759**). Remaining queries unchanged.
+- All judged-only pair differences were **zero** because removing unjudged
+  passages leaves too little judged ranking variation; **not equivalence**.
+  170 judged and 16,030 unjudged validation candidates. This does not
+  resolve incomplete qrels or establish generalization.
+
+## 8E query-level error analysis (planned; measurements TBD)
+
+- Replay 8C semantic-only and combined heads, compare with original BM25
+  candidate ordering on the same validation SHA256; forbid new inference.
+- Export deterministic per-query gains/losses and top-five cases; stratify
+  descriptively by query token count, overlap with original BM25 top-1,
+  and BM25 rank of the best judged relevant candidate.
+- **TBD:** actual subgroup counts, means, extreme cases and interpretation.
+- Post-hoc descriptive diagnostics only; reused validation, incomplete qrels,
+  and no official test data.

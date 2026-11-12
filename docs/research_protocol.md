@@ -167,3 +167,18 @@ query differences, and compare `nonrelevant` with `judged_only` as **distinct
 sensitivity scenarios**. Judged-only removes unjudged passages from rankings;
 it is not a fix for missing judgments. Do not use official test data or
 present exploratory validation comparisons as confirmatory findings.
+
+## 8E query error protocol
+
+Use the exact 8D validation-pool fingerprint and train-only 647/162 split.
+Recreate the 8C fixed-seed semantic-only and combined linear heads from
+cached teacher scores and frozen text embeddings. No new model inference,
+no official test data. Compare semantic-only with BM25 and combined using
+per-query MRR@10 and nDCG@10 under the nonrelevant policy. Report query IDs,
+original BM25 positive rank, query length, lexical overlap with the original
+BM25 top-1 candidate, top-1 passage IDs, and the largest gains/losses.
+Aggregate descriptive bins with counts and mean deltas; do not treat
+post-hoc subgroups as statistically validated or causal explanations.
+Record every query, including zero-positive-coverage queries. Preserve
+missing judgments as unjudged metadata and do not claim a zero-gain passage
+is truly irrelevant. The validation split has been reused repeatedly.
