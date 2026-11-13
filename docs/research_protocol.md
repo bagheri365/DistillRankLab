@@ -217,3 +217,21 @@ changes versus the identical untrained initialization. These diagnostics
 measure optimization and ranking behavior, **not** statistical significance,
 causality, or held-out teacher imitation. No new model inference or official
 test data. Keep measured findings TBD until a real Mac experiment is run.
+
+## 9C teacher–relevance alignment protocol
+
+Use the full 809-query official SciFact TRAIN BM25 top-100 candidate export,
+SHA256-audited 647/162 split (seed 42), and existing frozen cross-encoder
+teacher cache. Audit **only 647 fit queries**. Fail closed if the cache is
+incomplete; never run model inference, query validation teacher scores or use
+the official test set. Preserve the BM25 candidate order, fixed pool and
+unjudged-vs-judged status. Report teacher/BM25 nDCG@10 and MRR@10, paired
+per-query gains and losses, teacher top-1 judgments (relevant, judged zero,
+unjudged), best judged-positive rank under each ranking, and top-1 disagreement.
+For score margins distinguish (1) best judged positive vs highest-scoring
+*other* candidate, often unjudged, from (2) best judged positive vs strongest
+*verified judged-zero* candidate, only when both labels exist. The former is
+not a positive/negative classification margin; unjudged top-1 is not a
+teacher error. Group by initial BM25 positive rank and disagreement status;
+report bin sample counts and example query IDs. No statistical significance
+claims from exploratory post-hoc subgroups. Keep findings TBD until measured.

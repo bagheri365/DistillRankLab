@@ -232,3 +232,26 @@ Never use test-set scores to choose feature sets or optimization settings.
 - **TBD:** measured trajectories, order changes, agreement and interpretation.
 - Teacher agreement is **in-sample on fit queries** only, not validation
   teacher agreement or a claim of generalization.
+
+## 9B learning diagnostics (measured)
+
+- Commit `258f5a7`; **347 tests passed**; 647 fit / 162 exploratory validation.
+- Semantic-only teacher-only soft KL **1.90593 → 1.65636**; hybrid **1.90593 → 1.68864**;
+  relevance-only **1.90593 → 1.72127**. Learned cosine coefficients 2.44655,
+  2.11710, 1.78830 respectively; identical validation ranking metrics in 9A.
+- Combined teacher-only soft KL **1.90619 → 0.69545**; hybrid **1.90619 → 0.83653**;
+  relevance-only **1.90619 → 0.98125**. Fit-query teacher top-1 agreement
+  ~0.623, 0.623, 0.620 respectively. **In-sample**, not generalization.
+- Validation ordering changes are versus zero-centered initialized head, **not**
+  raw cosine or BM25; zero-initialization ties explain the 162/162 changes in
+  semantic-only heads. Optimization works, but relevance gains remain unproven.
+
+## 9C teacher–relevance alignment audit (planned; measurements TBD)
+
+- **TBD:** teacher/BM25 fit-query nDCG@10, per-query disagreements,
+  best judged-positive ranks, teacher top-1 judgment status and margins.
+- Distinguish unjudged passages from judged negatives. Only report margins to
+  *verified* judged zeros when those exist; also report separately the margin
+  against the highest-scoring nonpositive candidate, which may be unjudged.
+- All 9C findings are descriptive and **in-sample on 647 fitting queries**.
+  No teacher inference, new embeddings, validation teacher inference or test use.
