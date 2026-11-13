@@ -31,6 +31,45 @@ These are distinct empirical questions. DistillRankLab tests them separately, us
 
 > **Central question:** Does better teacher imitation translate into better held-out relevance ranking?
 
+## How DistillRankLab Works
+
+The distillation experiments compare **hard-label relevance supervision** from SciFact judgments with **soft-label teacher supervision** from a frozen cross-encoder. The student can be trained with either objective or a hybrid of both.
+
+```mermaid
+flowchart TD
+    Q["Query + Document Collection"] --> B["BM25 Retrieval"]
+    B --> C["Top-100 Candidate Documents"]
+    C --> T["Frozen Cross-Encoder Teacher"]
+    C --> S["Trainable Student Ranker"]
+    C --> H["SciFact Relevance Judgments<br/>(Hard Labels)"]
+    T --> TS["Teacher Scores"]
+    TS --> P["Temperature Softmax<br/>(Soft Labels)"]
+    S --> SS["Student Scores / Probabilities"]
+    P --> KL["KL Distillation Loss"]
+    SS --> KL
+    H --> REL["Relevance Supervision Loss"]
+    SS --> REL
+    KL --> HY["Teacher-only / Relevance-only / Hybrid Objective"]
+    REL --> HY
+    HY --> U["Backpropagation: Update Student Only"]
+    U -.-> S
+    S --> R["Rerank Candidate Documents"]
+    R --> E["Evaluate nDCG@10 and MRR@10"]
+
+    classDef teacher fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef student fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef hard fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef loss fill:#f3e8ff,stroke:#9333ea,color:#581c87
+    class T,TS,P teacher
+    class S,SS,U,R student
+    class H,REL hard
+    class KL,HY loss
+```
+
+**How to read the diagram:** Hard labels describe judged relevance; soft labels encode the teacher's relative preferences over candidates. The KL objective trains the student to imitate the teacher, while the relevance objective trains it against available judgments. Only the student is updated. The arrows from the student to evaluation describe the **trained** student; evaluation is separate from optimization.
+
+This is the **distillation pipeline**, not the later BM25–cosine rank-blending experiment. The rank blends in the findings below use frozen semantic similarity and BM25 ranks without training a distilled student.
+
 ## Experimental Setup
 
 | Component | Configuration |
