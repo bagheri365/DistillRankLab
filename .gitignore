@@ -25,3 +25,9 @@ teacher_scores_*.json
 
 # Downloaded benchmark archives and generated candidate pools
 datasets/
+
+# Generated experiment summaries at repository root
+/ablation_quick.csv
+/ablation_results.csv
+/teacher_capacity_quick.csv
+/teacher_capacity_results.csv
