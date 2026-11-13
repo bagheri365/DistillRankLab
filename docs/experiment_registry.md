@@ -255,3 +255,26 @@ Never use test-set scores to choose feature sets or optimization settings.
   against the highest-scoring nonpositive candidate, which may be unjudged.
 - All 9C findings are descriptive and **in-sample on 647 fitting queries**.
   No teacher inference, new embeddings, validation teacher inference or test use.
+
+## 9C teacher–relevance alignment (measured)
+
+- Commit `d5cc054`; **354 tests passed**; 647 fit queries only; no validation
+  or official test evaluation.
+- BM25 nDCG@10 **0.66727285**, teacher **0.69353798** (difference **+0.02626513**);
+  140 improved / 87 regressed / 420 unchanged.
+- Teacher top-1: 371 judged relevant, **276 unjudged**; no verified judged-zero
+  margins available. An unjudged teacher choice is not a proven error.
+- By original BM25 judged-positive rank: rank 1 (363 queries) Δ **−0.05985776**;
+  ranks 2–10 (156) Δ **+0.14290813**; ranks 11–100 (68) Δ **+0.24159176**;
+  no retrieved positive (60) Δ **0**. Qrel-derived bins are **not**
+  inference-time routing features. Descriptive in-sample analysis only.
+
+## 9D confidence-weighted teacher supervision (planned; measurements TBD)
+
+- Match the combined ten-feature student and 9A hybrid optimization; vary
+  only per-query weights on the soft teacher gradient, with mean-one normalization.
+- Uniform, bounded teacher top-two margin, teacher/BM25 top-1 agreement,
+  and deterministic shuffled-margin negative control. No relevance labels
+  used to compute weights. Keep hard-label gradients unchanged.
+- **TBD:** validation MRR/nDCG, paired deltas, CIs, p-values and weight
+  distribution. Validation is reused and exploratory; no official test.

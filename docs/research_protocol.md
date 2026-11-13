@@ -235,3 +235,20 @@ not a positive/negative classification margin; unjudged top-1 is not a
 teacher error. Group by initial BM25 positive rank and disagreement status;
 report bin sample counts and example query IDs. No statistical significance
 claims from exploratory post-hoc subgroups. Keep findings TBD until measured.
+
+## 9D confidence-aware supervision protocol
+
+On the existing SHA256-audited 647 fit / 162 exploratory validation split,
+train four otherwise identical combined ten-feature linear heads (seed 42,
+120 steps, learning rate .05, temperature 2, hard weight .5). Use frozen cached
+MiniLM embeddings and cross-encoder scores only; fail closed on cache misses.
+Apply mean-one per-query weights **only to soft teacher gradients**:
+uniform (1); bounded top-1 minus top-2 teacher logit gap
+`0.5 + gap/(1+gap)`; top-1 teacher/BM25 agreement (1.5 vs .5); and a seeded
+permutation of margin weights. Compute weights without qrels, never use
+validation judgments to choose thresholds, and keep hard gradients identical.
+Check that uniform weighting reproduces the original hybrid head exactly.
+Report all-query nDCG@10/MRR@10, query-paired uncertainty versus uniform,
+and weight ranges. Do not treat a teacher score gap as calibrated confidence,
+a single shuffled run as a significance test, or repeated validation as
+confirmatory evidence. No official test access.
