@@ -182,3 +182,28 @@ Never use test-set scores to choose feature sets or optimization settings.
 - **TBD:** actual subgroup counts, means, extreme cases and interpretation.
 - Post-hoc descriptive diagnostics only; reused validation, incomplete qrels,
   and no official test data.
+
+## 8E query-level diagnostics (measured)
+
+- Commit `484c2cc`; 326 tests passed; train-only validation fingerprint
+  `efca1a9fa6463a831749c747b9a3d1543f18161c474aadec63750949aa6cc440`.
+- Semantic-only minus BM25: mean nDCG@10 **+0.01454917** across 162 queries;
+  **38 improved, 33 regressed, 91 unchanged**.
+- Of 135 queries with a judged positive originally in BM25 top 10, mean
+  delta **-0.02556136** (29 improved, 33 regressed). Of 15 with a positive
+  at BM25 ranks 11–100, mean delta **+0.38718318** (9 improved, 0 regressed).
+  Twelve queries had no retrieved judged positive, delta zero.
+- Semantic-only minus combined: **+0.00417468** mean nDCG, 36 improved,
+  34 regressed, 92 unchanged. These post-hoc bins are descriptive only;
+  sparse judgments and reused validation preclude confirmatory inference.
+
+## 9A matched-supervision controls (planned; measurements TBD)
+
+- Freeze encoder, candidate pool, split, feature block, initialization and
+  optimization. Compare soft teacher-only, hard relevance-only, hybrid and
+  (semantic block) untrained cosine, with BM25 reference.
+- Train-only 647/162; cache-only replay; paired query statistics; 8D pool
+  fingerprint. **TBD:** actual scores, deltas and uncertainty after Mac run.
+- Primary scientific question: Does teacher supervision help over the same
+  architecture trained without teacher targets? Reused validation means
+  results are exploratory, not confirmatory.

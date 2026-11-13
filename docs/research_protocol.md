@@ -182,3 +182,21 @@ post-hoc subgroups as statistically validated or causal explanations.
 Record every query, including zero-positive-coverage queries. Preserve
 missing judgments as unjudged metadata and do not claim a zero-gain passage
 is truly irrelevant. The validation split has been reused repeatedly.
+
+## 9A controlled supervision protocol
+
+Hold the frozen `all-MiniLM-L6-v2` encoder, 8D audited candidate pool, 647/162
+query split, feature matrices, seed 42, 120 optimizer steps and learning rate
+0.05 constant. For each of semantic-only (2 active coordinates) and combined
+(10 active), fit the identical head with hard weights 0 (teacher-only), 0.5
+(hybrid), and 1 (relevance-only). Add a no-training raw embedding-cosine
+baseline for semantic-only and the original BM25 ranking. Compare teacher-only
+and hybrid against relevance-only, and hybrid against teacher-only, with paired
+query bootstrap and sign-flip diagnostics (10,000 replicates). Teacher-only
+must not use hard-label gradients; relevance-only must not use teacher gradients.
+No encoder/teacher inference or official test data. Verify exact score-pool
+alignment and the fixed SHA256. Record the full report even when results are
+null or negative. All inference remains exploratory due to repeatedly reused
+validation, sparse judgments, and unadjusted multiple tests. This isolates
+supervision conditional on a pretrained encoder, not the origin of the
+encoder's pretrained knowledge; no end-to-end CPU latency claims.
