@@ -207,3 +207,28 @@ Never use test-set scores to choose feature sets or optimization settings.
 - Primary scientific question: Does teacher supervision help over the same
   architecture trained without teacher targets? Reused validation means
   results are exploratory, not confirmatory.
+
+## 9A controlled supervision (measured)
+
+- Commit `358ec88`; **338 tests passed**; train-only 647 fit / 162 validation;
+  fingerprint `efca1a9fa6463a831749c747b9a3d1543f18161c474aadec63750949aa6cc440`.
+- Semantic-only (2 active features): teacher-only, relevance-only, hybrid,
+  and untrained cosine all **MRR@10 0.67072065 / nDCG@10 0.70291414**;
+  zero observed pairwise metric differences. Identical metrics do not prove
+  identical learned weights, scores, or full candidate ordering.
+- Combined (10 features): relevance-only nDCG **0.69720235**; teacher-only
+  **0.69807287**; hybrid **0.69873946**. Hybrid minus relevance-only
+  **+0.00153711** nDCG, bootstrap 95% CI **[-0.00027052, 0.00388285]**,
+  sign-flip **p=0.17848**. Teacher-only minus relevance-only **+0.00087051**,
+  95% CI **[-0.00191306, 0.00369559]**, **p=0.56754**.
+- No statistically established teacher-supervision advantage. Results remain
+  exploratory: reused validation, incomplete judgments, unadjusted tests.
+
+## 9B optimization and ranking diagnostics (planned; measurements TBD)
+
+- Compare matched objectives with trace checkpoints, final active head
+  coefficients, fit-query teacher rank agreement, and validation ordering
+  changes from the same random initialization.
+- **TBD:** measured trajectories, order changes, agreement and interpretation.
+- Teacher agreement is **in-sample on fit queries** only, not validation
+  teacher agreement or a claim of generalization.

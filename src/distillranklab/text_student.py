@@ -94,7 +94,8 @@ def text_feature_groups(groups: Sequence[QueryGroup], embeddings: Mapping[str, n
 def fit_text_head(groups: Sequence[QueryGroup], matrices: Sequence[np.ndarray],
                   teacher_scores: Mapping[tuple[str, str], float], *, steps: int = 120,
                   learning_rate: float = 0.05, temperature: float = 2.0,
-                  hard_weight: float = 0.5, seed: int = 42) -> dict:
+                  hard_weight: float = 0.5, seed: int = 42,
+                  trace: list[dict] | None = None) -> dict:
     """Hybrid listwise distillation; hard supervision excludes no-positive queries."""
     if (not groups or len(groups) != len(matrices) or len({g.query_id for g in groups}) != len(groups)
             or type(steps) is not int or steps < 1 or not math.isfinite(learning_rate)
@@ -115,7 +116,24 @@ def fit_text_head(groups: Sequence[QueryGroup], matrices: Sequence[np.ndarray],
     if hard_weight and not hard_count:
         raise ValueError('hard supervision requires retrieved positives')
     w = np.random.default_rng(seed).normal(0, 0.01, len(TEXT_FEATURE_NAMES))
-    for _ in range(steps):
+    def record(step: int) -> None:
+        if trace is None:
+            return
+        soft_kl = 0.0
+        hard_ce = 0.0
+        for x, (soft, hard) in zip(matrices, targets):
+            pred_soft = _probabilities(x @ w, temperature)
+            soft_kl += float(np.sum(soft * np.log(np.maximum(soft, 1e-300) /
+                                                    np.maximum(pred_soft, 1e-300)))) / len(groups)
+            if hard is not None:
+                pred_hard = _probabilities(x @ w, 1.0)
+                hard_ce -= float(np.sum(hard * np.log(np.maximum(pred_hard, 1e-300)))) / hard_count
+        trace.append({'step': step, 'soft_kl': soft_kl, 'hard_cross_entropy': hard_ce,
+                      'weight_norm': float(np.linalg.norm(w)), 'weights': w.tolist()})
+
+    record(0)
+    checkpoints = {1, 10, 30, 60, steps}
+    for step in range(1, steps + 1):
         grad = np.zeros_like(w)
         for x, (soft, hard) in zip(matrices, targets):
             logits = x @ w
@@ -125,6 +143,8 @@ def fit_text_head(groups: Sequence[QueryGroup], matrices: Sequence[np.ndarray],
         w -= learning_rate * grad
         if not np.isfinite(w).all():
             raise ValueError('training diverged')
+        if trace is not None and step in checkpoints:
+            record(step)
     return {'version': 1, 'architecture': 'frozen_encoder_linear_head', 'features': list(TEXT_FEATURE_NAMES),
             'weights': w.tolist(), 'parameter_count': len(w), 'steps': steps,
             'learning_rate': learning_rate, 'temperature': temperature,

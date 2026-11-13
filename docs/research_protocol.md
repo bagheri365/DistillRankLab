@@ -200,3 +200,20 @@ null or negative. All inference remains exploratory due to repeatedly reused
 validation, sparse judgments, and unadjusted multiple tests. This isolates
 supervision conditional on a pretrained encoder, not the origin of the
 encoder's pretrained knowledge; no end-to-end CPU latency claims.
+
+## 9B learning diagnostics protocol
+
+Use the same 647/162 train-only split, 8D validation fingerprint, BM25 top-100,
+model-bound embedding cache and frozen teacher-score cache as 9A. Fit identical
+semantic-only and combined linear heads under teacher-only, relevance-only,
+and hybrid supervision, seed 42, 120 steps, learning rate 0.05 and temperature
+2. Record soft KL and hard-label cross-entropy at steps 0, 1, 10, 30, 60, 120
+(omit checkpoints exceeding the configured step count), even when a loss term
+has zero training weight. Check that instrumented and uninstrumented fits
+produce identical coefficients. Report active weights and fit-query teacher
+agreement (top-1 and stable-tie Spearman), explicitly marked **in-sample**.
+Count exact validation top-1, top-10 order, full order and top-10 membership
+changes versus the identical untrained initialization. These diagnostics
+measure optimization and ranking behavior, **not** statistical significance,
+causality, or held-out teacher imitation. No new model inference or official
+test data. Keep measured findings TBD until a real Mac experiment is run.
